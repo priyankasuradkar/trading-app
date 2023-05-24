@@ -1,14 +1,28 @@
-const user = reqiure('../')
+const express = require('express')
+const user = require('../model/user')
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const { JWT_KEY } = require('../config/prod')
+const { nanoid } = require('nanoid');
+const emailOTPVerification = require('../midddleware/emailOTPVerification');
+const forgetPasswordOTPSender = require('../midddleware/forgetPasswordOTPSender');
+//const moment = require('moment')
+require('dotenv').config
 
 const signUp = async (req, res) => {
     try {
         const { fullName, email, password, } = req.body
+        //console.log("#####", fullName, email, password)
         const userData = await user.findOne({ "email": email }).lean()
+        console.log("####", userData)
 
-        if (!userData)
+        if (userData)
             return res.status(404).json({ error: "User already exists!!" })
 
-        const encryptPassword = bcrypt.hash(password, 12)
+        const encryptPassword = await bcrypt.hash(password, 12)
+        const uniqueId = nanoid(10);
+        console.log(uniqueId);
+        //console.log("@@@@@@@@@@", encryptPassword)
         const userObject = {
             fullName,
             email,
@@ -16,13 +30,14 @@ const signUp = async (req, res) => {
         }
 
         //middleware - email verification//
-        const isRegistered = new user(userObject)
-        const isUserSavedOrNot = isRegistered.save()
+        emailOTPVerification(email)
+        const isUserRegistered = new user(userObject)
+        const isUserSavedOrNot = isUserRegistered.save()
 
-        if (isUserSavedOrNot)
+        if (!isUserSavedOrNot)
             return res.status(500).json({ error: "Internal server error!!!" })
 
-        return res.status(200).json({ success: "Successful registrtion!!!" })
+        return res.status(200).json({ success: "Successful registration!!!" })
 
     }
     catch (error) {
@@ -34,10 +49,12 @@ const signUp = async (req, res) => {
 const login = async (req, res) => {
     try {
         const { email, password } = req.body
+        //console.log("########", email, password)
         const userData = await user.findOne({ "email": email }).lean()
+        console.log("########", userData)
 
-        if (userData)
-            return res.status(403).json({ error: "User already exists!!" })
+        if (!userData)
+            return res.status(403).json({ error: "Account not found!!" })
 
         if (userData.accountStatus === "PENDING")
             return res.status(403).json({ error: "Please verify your account!!" })
@@ -70,36 +87,40 @@ const login = async (req, res) => {
 const otpVerification = async (req, res) => {
     try {
         const { email, otp } = req.body
+        //console.log("######", email, otp)
         const userData = await user.findOne({ "email": email }).lean()
+        //console.log("######", userData)
 
         if (!userData)
             return res.status(403).json({ error: "User already exists!!" })
-
+        //console.log("###########", userData)
         if (otp === userData.verificationCode) {
-            await user.updateOne({ "email": email }, {
-                $set: {
-                    "accountStatus": "ACTIVE"
-                }
+            const updatedStatus = await user.updateOne({ "email": email }, {
+                $set: { "accountStatus": "ACTIVE" }
             })
-            return res.status(200).json({ error: "otp verified" })
+            console.log("@##########", updatedStatus)
+            return res.status(200).json({ success: "otp verified" })
         }
-        return res.status(500).json({ error: "Internal server error" })
+
+        return res.status(500).json({ error: "Incorrect otp" })
     }
     catch (error) {
         console.log("ERROR::", error)
-        return res.status(500).json({ error: "Internal server error!!" })
+        return res.status(500).json({ error: error })
     }
 }
 
 const forgotPassword = async (req, res) => {
     try {
         const { email } = req.body;
+        console.log("###########", email)
         const userData = await user.findOne({ "email": email }).lean();
 
         if (!userData)
             return res.status(404).json({ error: 'Email does not found!! ' })
 
         //middleware
+        forgetPasswordOTPSender(email)
         return res.status(200).json({ success: "link sent to your email " })
     }
     catch (error) {
@@ -111,9 +132,8 @@ const forgotPassword = async (req, res) => {
 const resendOTP = async (req, res) => {
     try {
         const { email } = req.body
-        //middleware
-
-        return res.status(200).json({ success: 'OTP resend on your number!!' })
+        forgetPasswordOTPSender(email)
+        return res.status(200).json({ success: 'OTP resend on your email!!' })
     }
     catch (error) {
         console.log("ERROR::", error)
@@ -124,13 +144,16 @@ const resendOTP = async (req, res) => {
 
 const resetPassword = async (req, res) => {
     try {
-        const { password, email } = req.body;
+        const { newPassword, confirmPassword, email } = req.body;
 
         const userData = await user.findOne({ "email": email }).lean();
         if (!userData)
-            return res.status(404).json({ error: 'no email found!!' });
+            return res.status(404).json({ error: 'No user found!!' });
 
-        const encryptPassword = await bcrypt.hash(password, 12)
+        if (!(newPassword === confirmPassword))
+            return res.status(404).json({ error: "password should equal to confirm password!!" })
+
+        const encryptPassword = await bcrypt.hash(newPassword, 12)
         const updatedPassword = await user.updateOne({ "email": email }, {
             $set: {
                 "password": encryptPassword
@@ -146,33 +169,33 @@ const resetPassword = async (req, res) => {
 
 const updateProfileDetails = async (req, res) => {
     try {
-        let { fullName, password, email } = req.body;
+        let { fullName, email, newEmail } = req.body;
         const userDataToUpdate = {};
 
-        if (fullName)
+        if (fullName) {
+            console.log("##FULLNAME::", fullName)
             userDataToUpdate["fullName"] = fullName;
-
-        if (email) {
-            const userData = await user.findOne({ "email": email }).lean()
-            if (userData)
-                return res.status(403).json({ error: "User Already exists!!" })
-
-            await article.updateMany({ "email": email }, {
-                $set: {
-                    "email": email
-                }
-            })
+            console.log("#########", fullName)
         }
 
-        // if (password) {
-        //     const isUserExistOrNot = await user.findOne({ "email": userEmail }, { password: 1 }).lean();
-        //     const isPasswordMatched = await bcrypt.compare(
-        //         password,
-        //         encryptPassword
-        //     )
-        // }
+        if (newEmail) {
+            const userData = await user.findOne({ "email": email }).lean()
+            if (!userData)
+                return res.status(403).json({ error: "Account not found!!" })
+            // await user.updateOne({ "email": email }, {
+            //     $set: {
+            //         "email": newEmail
+            //     }
+            // })
 
-        await user.updateOne({ "email": email }, { $set: userDataToUpdate })
+            userDataToUpdate["email"] = newEmail
+            console.log("########", email)
+
+        }
+
+        console.log('###############', userDataToUpdate);
+        const update = await user.updateOne({ "email": email }, { $set: userDataToUpdate })
+        console.log("#########", update)
         return res.status(200).json({ success: 'data updated successfully!!' })
     } catch (error) {
         console.log("error", error)
@@ -192,7 +215,7 @@ const getUserInfo = async (req, res) => {
             "fullName": userData.fullName,
             "email": userData.email,
             "accountStatus": userData.accountStatus,
-            "accountNumber": userData.accountNumber
+            //"accountNumber": userData.accountNumber
         })
     }
     catch (error) {

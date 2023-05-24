@@ -1,29 +1,27 @@
-const mongoose = require('mongoose')
-
-const userSchema = new mongoose.userSchema({
-    fullName: {
+const mongoose = require('mongoose');
+const UserSchema = new mongoose.Schema({
+    googleId: {
+        type: String,
+        required: true
+    },
+    displayName: {
+        type: String,
+        required: true
+    },
+    userName: {
         type: String
     },
     email: {
-        type: String
-    },
-    password: {
-        type: String
+        type: String,
+        required: true
     },
     profilePicture: {
         type: String
     },
-    accountNumber: {
+    accessToken: {
         type: String
-    },
-    accountStatus: {
-        type: String,
-        default: "PENDING"
-    },
-    verificationCode: {
-        type: Number
     }
-})
+    // any additional fields you want to store
+});
 
-const user = mongoose.model("user", userSchema)
-module.exports = user
+module.exports = mongoose.model('User', UserSchema);
