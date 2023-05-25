@@ -19,6 +19,9 @@ const UserSchema = new mongoose.Schema({
     },
     accessToken: {
         type: String
+    },
+    verificationCode: {
+        type: Number
     }
 
 

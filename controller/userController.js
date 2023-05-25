@@ -1,4 +1,3 @@
-const express = require('express')
 const user = require('../model/user')
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
@@ -207,6 +206,7 @@ const getUserInfo = async (req, res) => {
             "fullName": userData.fullName,
             "email": userData.email,
             "accountStatus": userData.accountStatus,
+
 
         })
     }
