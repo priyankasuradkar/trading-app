@@ -8,7 +8,7 @@ const forgetPasswordOTPSender = (email) => {
     const message = {
 
         to: email,
-        from: 'azadsingh42878@gmail.com',
+        from: 'thebrewappdev@gmail.com',
         subject: 'OTP to your account',
         text: `Your otp is ${otp}`,
         html: `<p>Your otp is : ${otp}</p> `

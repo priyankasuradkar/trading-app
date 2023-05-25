@@ -8,7 +8,7 @@ const emailOTPVerification = (email) => {
     const otp = Math.floor(1000 + Math.random() * 9000)
     const msg = {
         to: email,
-        from: 'azadsingh42878@gmail.com',
+        from: 'thebrewappsdev@gmail.com',
         subject: "OTP to your account",
         text: `Your OTP is : ${otp}`,
         html: `<p>Your OTP is :${otp}</p>`

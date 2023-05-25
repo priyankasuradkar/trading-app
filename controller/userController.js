@@ -11,8 +11,8 @@ require('dotenv').config
 
 const signUp = async (req, res) => {
     try {
-        const { fullName, email, password, } = req.body
-        //console.log("#####", fullName, email, password)
+        const { fullName, email, password } = req.body
+        console.log("#####", fullName, email, password)
         const userData = await user.findOne({ "email": email }).lean()
         console.log("####", userData)
 
@@ -47,6 +47,7 @@ const signUp = async (req, res) => {
 const login = async (req, res) => {
     try {
         const { email, password } = req.body
+        console.log("########", email, password)
         const userData = await user.findOne({ "email": email }).lean()
         console.log("########", userData)
 
@@ -60,7 +61,7 @@ const login = async (req, res) => {
             password,
             userData.password
         )
-
+        console.log("########", isPasswordMatched)
         if (!isPasswordMatched)
             return res.status(404).json({ error: "Password incorrect!!" })
 
