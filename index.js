@@ -5,7 +5,7 @@ const userRoute = require('./routes/userRoutes')
 
 const app = express();
 app.use = (userRoute)
-const mongoDBConnectionStr = 'mongodb+srv://trading:trading@cluster0.pfcyujz.mongodb.net/google';
+//const mongoDBConnectionStr = 'mongodb+srv://trading:trading@cluster0.pfcyujz.mongodb.net/google';
 app.listen(PORT, () => {
     console.log('Server is Running on port 5000');
 })
