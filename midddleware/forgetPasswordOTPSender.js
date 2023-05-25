@@ -24,10 +24,7 @@ const forgetPasswordOTPSender = (email) => {
             })
             return 1
         })
-        .catch((error) => {
-            console.log('Error:', error.toString());
-            return 0
-        });
+
 }
 
 module.exports = forgetPasswordOTPSender

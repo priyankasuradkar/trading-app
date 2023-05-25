@@ -3,7 +3,7 @@ const user = require('../model/user')
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { JWT_KEY } = require('../config/prod')
-const { nanoid } = require('nanoid');
+
 const emailOTPVerification = require('../midddleware/emailOTPVerification');
 const forgetPasswordOTPSender = require('../midddleware/forgetPasswordOTPSender');
 //const moment = require('moment')
@@ -20,9 +20,7 @@ const signUp = async (req, res) => {
             return res.status(404).json({ error: "User already exists!!" })
 
         const encryptPassword = await bcrypt.hash(password, 12)
-        const uniqueId = nanoid(10);
-        console.log(uniqueId);
-        //console.log("@@@@@@@@@@", encryptPassword)
+
         const userObject = {
             fullName,
             email,
@@ -49,7 +47,6 @@ const signUp = async (req, res) => {
 const login = async (req, res) => {
     try {
         const { email, password } = req.body
-        //console.log("########", email, password)
         const userData = await user.findOne({ "email": email }).lean()
         console.log("########", userData)
 
@@ -87,13 +84,12 @@ const login = async (req, res) => {
 const otpVerification = async (req, res) => {
     try {
         const { email, otp } = req.body
-        //console.log("######", email, otp)
         const userData = await user.findOne({ "email": email }).lean()
-        //console.log("######", userData)
+
 
         if (!userData)
             return res.status(403).json({ error: "User already exists!!" })
-        //console.log("###########", userData)
+
         if (otp === userData.verificationCode) {
             const updatedStatus = await user.updateOne({ "email": email }, {
                 $set: { "accountStatus": "ACTIVE" }
@@ -182,11 +178,6 @@ const updateProfileDetails = async (req, res) => {
             const userData = await user.findOne({ "email": email }).lean()
             if (!userData)
                 return res.status(403).json({ error: "Account not found!!" })
-            // await user.updateOne({ "email": email }, {
-            //     $set: {
-            //         "email": newEmail
-            //     }
-            // })
 
             userDataToUpdate["email"] = newEmail
             console.log("########", email)
@@ -215,7 +206,7 @@ const getUserInfo = async (req, res) => {
             "fullName": userData.fullName,
             "email": userData.email,
             "accountStatus": userData.accountStatus,
-            //"accountNumber": userData.accountNumber
+
         })
     }
     catch (error) {

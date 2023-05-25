@@ -21,7 +21,8 @@ const UserSchema = new mongoose.Schema({
     accessToken: {
         type: String
     }
-    // any additional fields you want to store
+
+
 });
 
 module.exports = mongoose.model('User', UserSchema);
