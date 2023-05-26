@@ -2,6 +2,7 @@ const user = require('../model/user')
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { JWT_KEY } = require('../config/prod')
+const userVerification = require('../midddleware/userVerification')
 
 const emailOTPVerification = require('../midddleware/emailOTPVerification');
 const forgetPasswordOTPSender = require('../midddleware/forgetPasswordOTPSender');
@@ -30,6 +31,7 @@ const signUp = async (req, res) => {
         emailOTPVerification(email)
         const isUserRegistered = new user(userObject)
         const isUserSavedOrNot = isUserRegistered.save()
+        //console.log("#######", isUserSavedOrNot)
 
         if (!isUserSavedOrNot)
             return res.status(500).json({ error: "Internal server error!!!" })
@@ -70,6 +72,7 @@ const login = async (req, res) => {
             },
         }, JWT_KEY)
 
+        console.log("TOKEN::", token)
         return res.status(200).json({
             token,
             email: userData.email
@@ -196,19 +199,22 @@ const updateProfileDetails = async (req, res) => {
 
 const getUserInfo = async (req, res) => {
     try {
-        const { email } = req.body
+        //const { email } = req.params
+        const email = req.user.email
+        console.log("#######", email)
         const userData = await user.findOne({ "email": email }).lean()
+        //console.log("########", email, userData)
 
         if (!userData)
             return res.status(403).json({ error: "account not found!!" })
-
+        console.log("########", userData)
         return res.status(200).json({
             "fullName": userData.fullName,
             "email": userData.email,
             "accountStatus": userData.accountStatus,
-
-
+            "verificationCode": userData.verificationCode
         })
+
     }
     catch (error) {
         console.log("error", error)

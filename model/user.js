@@ -22,6 +22,10 @@ const UserSchema = new mongoose.Schema({
     },
     verificationCode: {
         type: Number
+    },
+    accountStatus: {
+        type: String,
+        default: "PENDING"
     }
 
 

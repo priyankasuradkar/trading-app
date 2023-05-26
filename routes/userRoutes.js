@@ -1,6 +1,6 @@
 const express = require('express')
 const route = express.Router()
-
+//const userVerification = require('../midddleware/userVerification')
 
 const {
     signUp,
@@ -12,6 +12,8 @@ const {
     updateProfileDetails,
     getUserInfo
 } = require('../controller/userController')
+const emailOTPVerification = require('../midddleware/emailOTPVerification')
+const userVerification = require('../midddleware/userVerification')
 
 route.post('/user/signup', signUp)
 route.post('/user/login', login)
@@ -20,7 +22,7 @@ route.post('/user/forgot', forgotPassword)
 route.post('/user/resend-otp', resendOTP)
 route.patch('/user/reset', resetPassword)
 route.patch('/user/update', updateProfileDetails)
-route.get('/user/get-user-info', getUserInfo)
+route.get('/user/get-user-info', userVerification, getUserInfo)
 
 
 

@@ -3,7 +3,7 @@ const user = require('../model/user')
 require('dotenv').config()
 const apikey = process.env.apikey
 
-//console.log('API KEY :::: ', apikey);
+console.log('API KEY :::: ', apikey);
 const emailOTPVerification = (email) => {
     const otp = Math.floor(1000 + Math.random() * 9000)
     const msg = {
