@@ -1,7 +1,7 @@
 const sgMail = require('@sendgrid/mail')
 const user = require('../model/user')
 require('dotenv').config
-const apikey = process.env.apikey
+const apiKey = process.env.apiKey
 
 const forgetPasswordOTPSender = (email) => {
     const otp = Math.floor(1000 + Math.random() * 9000)
@@ -14,7 +14,7 @@ const forgetPasswordOTPSender = (email) => {
         html: `<p>Your otp is : ${otp}</p> `
     }
 
-    sgMail.setApiKey(apikey)
+    sgMail.setApiKey(apiKey)
     sgMail.send(message)
         .then(async () => {
             await user.updateOne({ "email": email }, {
