@@ -36,7 +36,7 @@ const signUp = async (req, res) => {
         if (!isUserSavedOrNot)
             return res.status(500).json({ error: "Internal server error!!!" })
 
-        return res.status(200).json({ success: "Successful registration!!!" })
+        return res.status(200).json({ success: "Successfull registration!!!" })
 
     }
     catch (error) {
