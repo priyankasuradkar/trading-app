@@ -58,7 +58,7 @@ const login = async (req, res) => {
         if (userData.accountStatus === "PENDING")
             return res.status(403).json({ error: "Please verify your account!!" })
 
-        const isPasswordMatched = await bcrypt.compare(
+        const isPasswordMatched = bcrypt.compare(
             password,
             userData.password
         )
@@ -207,12 +207,11 @@ const getUserInfo = async (req, res) => {
 
         if (!userData)
             return res.status(403).json({ error: "account not found!!" })
-        console.log("########", userData)
+        console.log("########", userData.accountStatus)
         return res.status(200).json({
             "fullName": userData.fullName,
             "email": userData.email,
             "accountStatus": userData.accountStatus,
-            "verificationCode": userData.verificationCode
         })
 
     }
